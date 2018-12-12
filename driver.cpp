@@ -4,6 +4,9 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include "encrypt.h"
+#include "picosha2.h"
+
 using namespace std;
 
 static int callback(void *outputPtr, int argc, char **argv, char **azColName){
@@ -38,13 +41,13 @@ int main(){
       cin >> selection;
 
 
-      
+
       if( rc ){
           fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
           sqlite3_close(db);
           return 1;
       };
-      
+
       /* Login */
       if(selection == 1){
 
@@ -54,10 +57,12 @@ int main(){
         string password;
         cout << "Thank you "<< name << ".  What is your password?" << endl;
         cin >> password;
-          
-        string sql = "SELECT * FROM users where name='" + name + "' and password='" + password + "'";
+
+        string hash = picosha2::hash256_hex_string(password);
+
+        string sql = "SELECT * FROM users where name='" + name + "' and password='" + hash + "'";
         vector<string> results;
-          
+
         rc = sqlite3_exec(db, sql.c_str(), callback, &results, &zErrMsg);
         if( rc != SQLITE_OK ){
             fprintf(stderr, "SQL error: %s\n", zErrMsg);
@@ -70,7 +75,7 @@ int main(){
             }
             else {
                 cout << "Not a valid name/password combo.  Try again." << endl;
-              
+
             }
         }
       }
@@ -95,15 +100,17 @@ int main(){
           cout << "Username taken, please pick a different username." << endl;
           cin >> name;
         }
-        
-     
+
+
         string password;
         cout << "What is your new password?" << endl;
         cin >> password;
+
+        string hash = picosha2::hash256_hex_string(password);
         //encrypt that shiiiiiiiit
-        string sql = "INSERT INTO users (name, password) VALUES ('" + name + "','" + password + "');";
+        string sql = "INSERT INTO users (name, password) VALUES ('" + name + "','" + hash + "');";
         vector<string> results;
-          
+
         rc = sqlite3_exec(db, sql.c_str(), callback, &results, &zErrMsg);
         if( rc != SQLITE_OK ){
             fprintf(stderr, "SQL error: %s\n", zErrMsg);
@@ -143,7 +150,7 @@ int main(){
         string sql = "select * from users;";
         vector<string> userLog;
         rc = sqlite3_exec(db, sql.c_str(), callback, &userLog, &zErrMsg);
-        
+
         for (vector<string>::const_iterator i = userLog.begin(); i != userLog.end(); ++i)
           cout << *i << endl;
       }
@@ -171,10 +178,10 @@ int main(){
 
         vector<string> recdLog;
         rc = sqlite3_exec(db, view.c_str(), callback, &recdLog, &zErrMsg);
-        
+
         for (vector<string>::const_iterator i = recdLog.begin(); i != recdLog.end(); ++i)
           cout << *i << endl;
-        
+
       }
 
       /* Log out */
@@ -193,10 +200,9 @@ int main(){
         cout << "\nYour input did not match any of the options.\nPlease try again." << endl;
       }
     }
-  
+
   }
 
   sqlite3_close(db);
   return 0;
 }
-  
