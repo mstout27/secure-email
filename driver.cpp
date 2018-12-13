@@ -45,7 +45,8 @@ int main(){
     string name;
    /* State - logged out */
     while(!loggedIn && connected){
-      cout << "\nWelcome to the super secret email server." << endl;
+      cout << endl;
+      cout << "Welcome to the super secret email server." << endl;
       int selection;
 
       cout << "What would you like to do? Enter the number of your selected option." << endl;
@@ -53,7 +54,7 @@ int main(){
       cout << "2.) Register" << endl;
       cout << "3.) Quit" << endl;
       cin >> selection;
-
+      cout << endl;
 
 
       if( rc ){
@@ -69,8 +70,10 @@ int main(){
         cin >> name;
 
         string password;
+        cout << endl;
         cout << "Thank you "<< name << ".  What is your password?" << endl;
         cin >> password;
+        cout << endl;
 
         string hash = picosha2::hash256_hex_string(password);
 
@@ -95,15 +98,17 @@ int main(){
       }
 
       /* Register */
-      if(selection == 2){
+      else if(selection == 2){
         string name;
         cout << "What is your new login name?"<< endl;
         cin >> name;
+        cout << endl;
 
         /* Check for special characters */
         while((name.find(';')!= string::npos) || (name.find('-')!=string::npos) || (name.find('"')!=string::npos)){
           cout << "Username cannot contain special characters. Please try again."  << endl;
           cin >> name;
+          cout << endl;
         }
 
         /* Check for duplicate username */
@@ -113,12 +118,14 @@ int main(){
         while(count(users.begin(), users.end(), name)){
           cout << "Username taken, please pick a different username." << endl;
           cin >> name;
+          cout << endl;
         }
 
 
         string password;
         cout << "What is your new password?" << endl;
         cin >> password;
+        cout << endl;
 
         string hash = picosha2::hash256_hex_string(password);
 
@@ -141,7 +148,7 @@ int main(){
       }
 
       /* Quit */
-      if(selection == 3){
+      else if(selection == 3){
         cout << "We hope to see you again!" << endl;
         connected = 0;
       }
@@ -149,11 +156,12 @@ int main(){
       else{
         cout << "\nYour input did not match any of the options.\nPlease try again." << endl;
       }
-      
+
     }
 
   /* State - logged in */
     while(loggedIn){
+      cout << endl;
       cout << "What would you like to do? Enter the number of your selected option." << endl;
       int selection2;
       cout << "1.) View all users" << endl;
@@ -162,6 +170,7 @@ int main(){
       cout << "4.) Log out" << endl;
       cout << "5.) Disconnect" << endl;
       cin >> selection2;
+      cout << endl;
 
       /* View users */
       if(selection2 == 1){
@@ -178,14 +187,17 @@ int main(){
         string receiver;
         cout << "Choose a user to send to." << endl;
         cin >> receiver;
+        cout << endl;
 
         string message;
         cout << "Type the message to send." << endl;
         getline(cin >> ws, message);
+        cout << endl;
 
         string sendkey;
         cout << "Type secret key." << endl;
         cin >> sendkey;
+        cout << endl;
 
         string encrypted = encrypt(message,sendkey);
 
@@ -210,12 +222,16 @@ int main(){
         }
 
         cout << "Choose a message to view, or q to exit." << endl;
+
         string messageChoice;
         cin >> messageChoice;
+        cout << endl;
+
         if(messageChoice != "q"){
           cout << "Enter the secret key." << endl;
           string recvKey;
           cin >> recvKey;
+          cout << endl;
 
           string view = "select * from messages where receiver = '" + name + "';";
           vector<string> recdLog;
@@ -224,6 +240,7 @@ int main(){
           string decrypted;
           string crypto;
           int count2 = 1;
+
           for (vector<string>::const_iterator i = recdLog.begin(); i != recdLog.end(); ++i){
             if((count2) == stoi(messageChoice)){
               crypto = *i;
@@ -233,9 +250,6 @@ int main(){
             count2++;
           }
         }
-
-
-
       }
 
       /* Log out */
@@ -257,6 +271,7 @@ int main(){
 
   }
 
+  //Close program
   sqlite3_close(db);
   return 0;
 }
