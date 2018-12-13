@@ -23,6 +23,13 @@ static int callback2(void *outputPtr, int argc, char **argv, char **azColName){
     return 0;
 }
 
+static int callback3(void *outputPtr, int argc, char **argv, char **azColName){
+    int i;
+    vector<string> *list = reinterpret_cast<vector<string>*>(outputPtr);
+    list->push_back(argv[2]);
+    return 0;
+}
+
 //1 = login
 //2 = register
 int main(){
@@ -114,7 +121,7 @@ int main(){
         cin >> password;
 
         string hash = picosha2::hash256_hex_string(password);
-        //encrypt that shiiiiiiiit
+
         string sql = "INSERT INTO users (name, password) VALUES ('" + name + "','" + hash + "');";
         vector<string> results;
 
@@ -125,8 +132,7 @@ int main(){
         }
         else{
           if (results.empty()){
-            cout << "Welcome new user" << name << endl;
-            loggedIn = 1;
+            cout << "Welcome, new user " << name << endl;
           }
           else {
             cout << "Not a valid name/password combo.  Try again." << endl;
@@ -171,13 +177,12 @@ int main(){
         string message;
         cout << "Type the message to send." << endl;
         getline(cin >> ws, message);
-        cout << message <<endl;
 
-        string secretkey;
+        string sendkey;
         cout << "Type secret key." << endl;
-        cin >> secretkey;
+        cin >> sendkey;
 
-        string encrypted = encrypt(message,secretkey);
+        string encrypted = encrypt(message,sendkey);
 
         string send = "INSERT INTO messages VALUES('" + name + "','" + receiver + "','" + encrypted + "');";
 
@@ -193,8 +198,38 @@ int main(){
         vector<string> recdLog;
         rc = sqlite3_exec(db, view.c_str(), callback2, &recdLog, &zErrMsg);
 
-        for (vector<string>::const_iterator i = recdLog.begin(); i != recdLog.end(); ++i)
-          cout << *i << endl;
+        int count = 1;
+        for (vector<string>::const_iterator i = recdLog.begin(); i != recdLog.end(); ++i){
+          cout << count << ".) " << *i << endl;
+          count++;
+        }
+
+        cout << "Choose a message to view, or q to exit." << endl;
+        string messageChoice;
+        cin >> messageChoice;
+        if(messageChoice != "q"){
+          cout << "Enter the secret key." << endl;
+          string recvKey;
+          cin >> recvKey;
+
+          string view = "select * from messages where receiver = '" + name + "';";
+          vector<string> recdLog;
+          rc = sqlite3_exec(db, view.c_str(), callback3, &recdLog, &zErrMsg);
+
+          string decrypted;
+
+          int count2 = 1;
+          for (vector<string>::const_iterator i = recdLog.begin(); i != recdLog.end(); ++i){
+            if((count2) == stoi(messageChoice)){
+              decrypted = decrypt(*i,recvKey);
+              cout << decrypted << endl;
+            }
+            count2++;
+          }
+        }
+
+
+         
       }
 
       /* Log out */
