@@ -145,6 +145,11 @@ int main(){
         cout << "We hope to see you again!" << endl;
         connected = 0;
       }
+
+      else{
+        cout << "\nYour input did not match any of the options.\nPlease try again." << endl;
+      }
+      
     }
 
   /* State - logged in */
