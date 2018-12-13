@@ -217,11 +217,12 @@ int main(){
           rc = sqlite3_exec(db, view.c_str(), callback3, &recdLog, &zErrMsg);
 
           string decrypted;
-
+          string crypto;
           int count2 = 1;
           for (vector<string>::const_iterator i = recdLog.begin(); i != recdLog.end(); ++i){
             if((count2) == stoi(messageChoice)){
-              decrypted = decrypt(*i,recvKey);
+              crypto = *i;
+              decrypted = decrypt(crypto, recvKey);
               cout << decrypted << endl;
             }
             count2++;
@@ -229,7 +230,7 @@ int main(){
         }
 
 
-         
+
       }
 
       /* Log out */
