@@ -9,6 +9,7 @@
 
 using namespace std;
 
+//callback to get column 2
 static int callback(void *outputPtr, int argc, char **argv, char **azColName){
     int i;
     vector<string> *list = reinterpret_cast<vector<string>*>(outputPtr);
@@ -16,6 +17,7 @@ static int callback(void *outputPtr, int argc, char **argv, char **azColName){
     return 0;
 }
 
+//callback to get column 1
 static int callback2(void *outputPtr, int argc, char **argv, char **azColName){
     int i;
     vector<string> *list = reinterpret_cast<vector<string>*>(outputPtr);
@@ -23,6 +25,7 @@ static int callback2(void *outputPtr, int argc, char **argv, char **azColName){
     return 0;
 }
 
+//callback to get column 3
 static int callback3(void *outputPtr, int argc, char **argv, char **azColName){
     int i;
     vector<string> *list = reinterpret_cast<vector<string>*>(outputPtr);
@@ -30,9 +33,8 @@ static int callback3(void *outputPtr, int argc, char **argv, char **azColName){
     return 0;
 }
 
-//1 = login
-//2 = register
 int main(){
+  //initialize db with sqlite3
   sqlite3* db;
   char *zErrMsg = 0;
   int rc;
@@ -43,10 +45,12 @@ int main(){
 
     int loggedIn = 0;
     string name;
+
    /* State - logged out */
     while(!loggedIn && connected){
       cout << endl;
       cout << "Welcome to the super secret email server." << endl;
+
       int selection;
 
       cout << "What would you like to do? Enter the number of your selected option." << endl;
@@ -56,7 +60,7 @@ int main(){
       cin >> selection;
       cout << endl;
 
-
+      //check database
       if( rc ){
           fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
           sqlite3_close(db);
@@ -70,11 +74,13 @@ int main(){
         cin >> name;
 
         string password;
+
         cout << endl;
         cout << "Thank you "<< name << ".  What is your password?" << endl;
         cin >> password;
         cout << endl;
 
+        //hash password using picosha2
         string hash = picosha2::hash256_hex_string(password);
 
         string sql = "SELECT * FROM users where name='" + name + "' and password='" + hash + "'";
@@ -92,7 +98,6 @@ int main(){
             }
             else {
                 cout << "Not a valid name/password combo.  Try again." << endl;
-
             }
         }
       }
@@ -100,6 +105,7 @@ int main(){
       /* Register */
       else if(selection == 2){
         string name;
+
         cout << "What is your new login name?"<< endl;
         cin >> name;
         cout << endl;
@@ -121,12 +127,13 @@ int main(){
           cout << endl;
         }
 
-
         string password;
+
         cout << "What is your new password?" << endl;
         cin >> password;
         cout << endl;
 
+        //hash password to store using picosha2
         string hash = picosha2::hash256_hex_string(password);
 
         string sql = "INSERT INTO users (name, password) VALUES ('" + name + "','" + hash + "');";
@@ -153,6 +160,7 @@ int main(){
         connected = 0;
       }
 
+      // If some other number was entered
       else{
         cout << "\nYour input did not match any of the options.\nPlease try again." << endl;
       }
@@ -163,7 +171,9 @@ int main(){
     while(loggedIn){
       cout << endl;
       cout << "What would you like to do? Enter the number of your selected option." << endl;
+
       int selection2;
+
       cout << "1.) View all users" << endl;
       cout << "2.) Send a message" << endl;
       cout << "3.) View messages" << endl;
