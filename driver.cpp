@@ -16,6 +16,13 @@ static int callback(void *outputPtr, int argc, char **argv, char **azColName){
     return 0;
 }
 
+static int callback2(void *outputPtr, int argc, char **argv, char **azColName){
+    int i;
+    vector<string> *list = reinterpret_cast<vector<string>*>(outputPtr);
+    list->push_back(argv[0]);
+    return 0;
+}
+
 //1 = login
 //2 = register
 int main(){
@@ -161,27 +168,33 @@ int main(){
         cout << "Choose a user to send to." << endl;
         cin >> receiver;
 
-        string sendMessage;
+        string message;
         cout << "Type the message to send." << endl;
-        cin >> sendMessage;
-        string send = "INSERT INTO messages VALUES('" + name + "','" + receiver + "','" + sendMessage + "');";
+        getline(cin >> ws, message);
+        cout << message <<endl;
+
+        string secretkey;
+        cout << "Type secret key." << endl;
+        cin >> secretkey;
+
+        string encrypted = encrypt(message,secretkey);
+
+        string send = "INSERT INTO messages VALUES('" + name + "','" + receiver + "','" + encrypted + "');";
 
         vector<string> sentLog;
         rc = sqlite3_exec(db, send.c_str(), callback, &sentLog, &zErrMsg);
         cout << "Message sent." << endl;
-
       }
 
       /* View received messages */
       else if(selection2 == 3){
-        string view = "select sender, message from messages where receiver = '" + name + "';";
+        string view = "select * from messages where receiver = '" + name + "';";
 
         vector<string> recdLog;
-        rc = sqlite3_exec(db, view.c_str(), callback, &recdLog, &zErrMsg);
+        rc = sqlite3_exec(db, view.c_str(), callback2, &recdLog, &zErrMsg);
 
         for (vector<string>::const_iterator i = recdLog.begin(); i != recdLog.end(); ++i)
           cout << *i << endl;
-
       }
 
       /* Log out */
