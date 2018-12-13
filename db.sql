@@ -6,4 +6,5 @@ CREATE TABLE users (id integer primary key autoincrement, name text, password te
 CREATE TABLE messages (sender text, receiver text, message text);
 
 
+
 COMMIT;
